@@ -2,11 +2,6 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>🏫 Dashboard Infografis Sekolah</title>
-  <!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
   <title>Dashboard Infografis Sekolah</title>
   <style>
     body {
@@ -60,26 +55,25 @@
       padding: 0 10px 15px;
     }
 
-    /* 📱 Responsif untuk HP */
+    /* 📱 Responsif untuk layar kecil */
     @media (max-width: 768px) {
       .menu {
-        flex-direction: column;
-        gap: 20px;
-        align-items: center;
+        flex-direction: column; /* Ubah jadi vertikal */
+        align-items: center;    /* Pusatkan */
       }
       .card {
-        width: 90%;
-        max-width: 350px;
+        width: 100%;        /* Lebar penuh */
+        max-width: 500px;   /* Batas agar tidak terlalu besar */
       }
     }
   </style>
 </head>
 <body>
-  <h1>Dashboard Infografis Perkembangan Siswa <br> Madrasah Tsanawiyah Negeri Toba Samosir</h1>
+  <h1>Dashboard Infografis Sekolah<br>Madrasah Tsanawiyah Negeri Toba Samosir</h1>
   
   <div class="menu">
     <a href="tahfidz.html" class="card">
-      <img src="img/quran.png">
+      <img src="img/quran.png" alt="Tahfidz">
       <h2>Tahfidz</h2>
       <p>Infografis capaian hafalan siswa</p>
     </a>
@@ -93,9 +87,8 @@
     <a href="ekskul.html" class="card">
       <img src="img/uniform.png" alt="Ekskul">
       <h2>Ekskul</h2>
-      <p>Evaluasi kegiatan ekstrakurikuler Pramuka</p>
+      <p>Evaluasi kegiatan ekstrakurikuler</p>
     </a>
   </div>
 </body>
-
 </html>
