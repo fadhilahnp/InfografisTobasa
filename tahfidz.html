@@ -103,107 +103,148 @@
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
+      <br><br>
+      <!-- Pagination -->
+      <center><div id="pagination" class="flex justify-center items-center space-x-4 mt-4"></div></center>
     </div>
-  </div>
 
-  <script>
-    let chartSurah = null;
-    let chartTopSiswa = null;
-
-    // Escape untuk keamanan tabel
-    function escapeHtml(s) {
-      return String(s || '')
-      .replaceAll('&','&amp;')
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;')
-      .replaceAll('"','&quot;')
-      .replaceAll("'",'&#39;');
-    }
-
-    function handleData(response) {
-      if (!response || !response.data) return;
-      const data = response.data;
-
-      // --- KPI ---
-      document.getElementById("countData").textContent = data.length;
-      document.getElementById("countSiswa").textContent = new Set(data.map(d => d.name)).size;
-      document.getElementById("countSurah").textContent = new Set(data.map(d => d.surah)).size;
-      document.getElementById("countKelas").textContent = new Set(data.map(d => d.class)).size;
-
-      // --- Table ---
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-      data.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="px-4 py-2 border">${escapeHtml(item.name)}</td>
-          <td class="px-4 py-2 border">${escapeHtml(item.class)}</td>
-          <td class="px-4 py-2 border">${escapeHtml(item.surah)}</td>
-          <td class="px-4 py-2 border">${
-          	// escapeHtml(item.date || '-')
-          	item.date 
-            ? new Date(item.date).toLocaleDateString("id-ID", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric"
-              }) 
-            : "-"
-            }</td>
-          `;
-          tbody.appendChild(tr);
+    <script>
+      let chartSurah = null;
+      let chartTopSiswa = null;
+      let allData = [];        // simpan semua data
+      let currentPage = 1;     // halaman aktif
+      const rowsPerPage = 20;  // jumlah data per halaman
+      
+      // Escape untuk keamanan tabel
+      function escapeHtml(s) {
+        return String(s || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+      }
+      
+      // Render tabel berdasarkan halaman
+      function renderTable(page = 1) {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+      
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = allData.slice(start, end);
+      
+        pageData.forEach(item => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="px-4 py-2 border">${escapeHtml(item.name)}</td>
+            <td class="px-4 py-2 border">${escapeHtml(item.class)}</td>
+            <td class="px-4 py-2 border">${escapeHtml(item.surah)}</td>
+            <td class="px-4 py-2 border">${
+              item.date 
+              ? new Date(item.date).toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+                })
+              : "-"
+              }</td>
+            `;
+            tbody.appendChild(tr);
+          });
+      
+        renderPagination();
+      }
+      
+      // Render tombol pagination
+      function renderPagination() {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+      
+        const totalPages = Math.ceil(allData.length / rowsPerPage);
+      
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "⬅️ Sebelumnya";
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.className = "px-3 py-1 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.onclick = () => { currentPage--; renderTable(currentPage); };
+        pagination.appendChild(prevBtn);
+      
+        const info = document.createElement("span");
+        info.textContent = `\xa0\xa0\xa0\xa0Halaman ${currentPage} dari ${totalPages}\xa0\xa0\xa0\xa0`;
+        pagination.appendChild(info);
+      
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Berikutnya ➡️";
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.className = "px-3 py-1 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.onclick = () => { currentPage++; renderTable(currentPage); };
+        pagination.appendChild(nextBtn);
+      }
+      
+      // Handler data dari API
+      function handleData(response) {
+        if (!response || !response.data) return;
+        allData = response.data; // simpan semua data
+      
+        // --- KPI ---
+        document.getElementById("countData").textContent = allData.length;
+        document.getElementById("countSiswa").textContent = new Set(allData.map(d => d.name)).size;
+        document.getElementById("countSurah").textContent = new Set(allData.map(d => d.surah)).size;
+        document.getElementById("countKelas").textContent = new Set(allData.map(d => d.class)).size;
+      
+        // --- Tabel dengan pagination ---
+        renderTable(currentPage);
+      
+        // --- Charts ---
+        if (chartSurah) chartSurah.destroy();
+        if (chartTopSiswa) chartTopSiswa.destroy();
+      
+        const surahCount = {};
+        allData.forEach(d => { if (d.surah) surahCount[d.surah] = (surahCount[d.surah] || 0) + 1; });
+      
+        chartSurah = new Chart(document.getElementById("chartSurah"), {
+          type: "pie",
+          data: {
+            labels: Object.keys(surahCount),
+            datasets: [{ data: Object.values(surahCount) }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right' } }
+          }
         });
-
-      // --- Destroy old charts ---
-      if (chartSurah) chartSurah.destroy();
-      if (chartTopSiswa) chartTopSiswa.destroy();
-
-      // --- Chart Surah (pie) ---
-      const surahCount = {};
-      data.forEach(d => { if (d.surah) surahCount[d.surah] = (surahCount[d.surah] || 0) + 1; });
-
-      chartSurah = new Chart(document.getElementById("chartSurah"), {
-        type: "pie",
-        data: {
-          labels: Object.keys(surahCount),
-          datasets: [{ data: Object.values(surahCount) }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'right' } }
-        }
-      });
-
-      // --- Chart Top Siswa (bar) ---
-      const siswaCount = {};
-      data.forEach(d => { if (d.name) siswaCount[d.name] = (siswaCount[d.name] || 0) + 1; });
-      const top = Object.entries(siswaCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
-
-      chartTopSiswa = new Chart(document.getElementById("chartTopSiswa"), {
-        type: "bar",
-        data: {
-          labels: top.map(x => x[0]),
-          datasets: [{ label: "Jumlah Hafalan", data: top.map(x => x[1]) }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    // Load JSONP dari Google Apps Script
-    function loadData() {
-      const url = "https://script.google.com/macros/s/AKfycbw_HVD1kzti6YZEiSQA3AcMf7t01X5j67F1Kqgk-nWfkzeJ-2L8J2SKxLLwuhmR9LWi/exec?sheet=Tahfidz&callback=handleData"; 
-      const script = document.createElement("script");
-      script.src = url;
-      document.body.appendChild(script);
-    }
-
-    loadData();
-  </script>
+      
+        const siswaCount = {};
+        allData.forEach(d => { if (d.name) siswaCount[d.name] = (siswaCount[d.name] || 0) + 1; });
+        const top = Object.entries(siswaCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+      
+        chartTopSiswa = new Chart(document.getElementById("chartTopSiswa"), {
+          type: "bar",
+          data: {
+            labels: top.map(x => x[0]),
+            datasets: [{ label: "Jumlah Hafalan", data: top.map(x => x[1]) }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+      
+      // Load JSONP dari Google Apps Script
+      function loadData() {
+        const url = "https://script.google.com/macros/s/AKfycbw_HVD1kzti6YZEiSQA3AcMf7t01X5j67F1Kqgk-nWfkzeJ-2L8J2SKxLLwuhmR9LWi/exec?sheet=Tahfidz&callback=handleData"; 
+        const script = document.createElement("script");
+        script.src = url;
+        document.body.appendChild(script);
+      }
+      
+      loadData();
+</script>
 </body>
 </html>
