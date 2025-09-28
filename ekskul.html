@@ -9,9 +9,33 @@
     .siswa-block { margin-bottom: 40px; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     .siswa-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
     canvas { max-width: 1600px; }
+
+    .home-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .home-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .home-btn img {
+      width: 28px;
+      height: 28px;
+    }
+
   </style>
 </head>
 <body>
+  <a href="index.html" class="home-btn" title="Kembali ke Dashboard">
+    <img src="https://img.icons8.com/fluency/48/home.png" alt="Home">
+  </a>
+  
   <h2>📊 Infografis Ekstrakurikuler</h2>
   <div id="charts"></div>
 
@@ -57,7 +81,7 @@
                 row["sikap dan karakter"],
                 row["fisik dan mental"]
               ],
-              backgroundColor: ["red", "blue", "green"],
+              backgroundColor: ["#ff6384", "#36a2eb", "#ffce56"],
               barThickness: 50 // Batang lebih tipis
             }]
           },
