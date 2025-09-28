@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Infografis Absensi</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h2 { margin-bottom: 20px; }
+    .summary { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+    .card {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      min-width: 200px;
+    }
+    .card h3 { margin: 0; font-size: 22px; }
+    .card p { margin: 8px 0 0; font-size: 14px; color: #666; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f0f0f0;
+    }
+    tr:hover { background: #f9f9f9; }
+    .chart-wrapper {
+      max-width: 1000px;   /* batas ukuran chart */
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Infografis Absensi Siswa</h2>
+
+  <!-- Ringkasan -->
+  <div class="card">
+      <h3 id="totalSiswa">0</h3>
+      <p>Total Siswa</p>
+    </div>
+  <div class="summary">
+    
+    <div class="card">
+      <div class="chart-wrapper">
+        <canvas id="chartAbsensi"></canvas>
+      </div>
+      <p>Rekap Absensi</p>
+    </div>
+  </div>
+
+  <!-- Tabel Absensi -->
+  <table id="absensiTable">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Kelas</th>
+        <th>Sakit</th>
+        <th>Izin</th>
+        <th>Alpha</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbw_HVD1kzti6YZEiSQA3AcMf7t01X5j67F1Kqgk-nWfkzeJ-2L8J2SKxLLwuhmR9LWi/exec?sheet=Absensi&callback=handleAbsensi";
+
+    function loadData() {
+      const script = document.createElement("script");
+      script.src = API_URL;
+      document.body.appendChild(script);
+    }
+
+    function handleAbsensi(response) {
+      const data = response.data;
+      const siswaMap = {};
+
+      data.forEach(row => {
+        const nama = row.name;
+        const kelas = row.class;
+        const status = row.status.toLowerCase();
+
+        if (!siswaMap[nama]) {
+          siswaMap[nama] = { nama, kelas, sakit: 0, izin: 0, alpha: 0 };
+        }
+
+        if (status === "sakit") siswaMap[nama].sakit++;
+        if (status === "izin") siswaMap[nama].izin++;
+        if (status === "alpha") siswaMap[nama].alpha++;
+      });
+
+      const siswaList = Object.values(siswaMap);
+
+      // Render tabel
+      const tbody = document.querySelector("#absensiTable tbody");
+      tbody.innerHTML = "";
+      siswaList.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.nama}</td>
+          <td>${row.kelas}</td>
+          <td>${row.sakit || "-"}</td>
+          <td>${row.izin || "-"}</td>
+          <td>${row.alpha || "-"}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Total siswa
+      document.getElementById("totalSiswa").textContent = siswaList.length;
+
+      // Rekap total
+      let totalSakit = siswaList.reduce((sum, r) => sum + r.sakit, 0);
+      let totalIzin = siswaList.reduce((sum, r) => sum + r.izin, 0);
+      let totalAlpha = siswaList.reduce((sum, r) => sum + r.alpha, 0);
+
+      // Buat donut chart kecil
+      new Chart(document.getElementById("chartAbsensi"), {
+        type: "doughnut",
+        data: {
+          labels: ["Sakit", "Izin", "Alpha"],
+          datasets: [{
+            data: [totalSakit, totalIzin, totalAlpha],
+            backgroundColor: ["#ff6384", "#36a2eb", "#ffce56"]
+          }]
+        },
+        options: {
+          cutout: "70%", // bikin lebih ramping
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { font: { size: 12 } } }
+          }
+        }
+      });
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
