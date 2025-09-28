@@ -35,10 +35,10 @@ Proyek ini memvisualisasikan data dalam bentuk **tabel interaktif**, **diagram p
 - **Database**: Google Sheets  
 
 ## 📂 Struktur Proyek
-├── index.html # Halaman utama dashboard
-├── tahfidz.html # Infografis hafalan Al-Qur'an
-├── absensi.html # Infografis absensi siswa
-├── ekskul.html # Infografis ekstrakurikuler
+├── index.html # Halaman utama dashboard\
+├── tahfidz.html # Infografis hafalan Al-Qur'an\
+├── absensi.html # Infografis absensi siswa\
+├── ekskul.html # Infografis ekstrakurikuler\
 └── README.md
 
 ## ⚙️ Konfigurasi Google Sheets & Apps Script
