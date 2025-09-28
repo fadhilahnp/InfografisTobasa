@@ -40,18 +40,42 @@
       max-width: 1000px;   /* batas ukuran chart */
       margin: 0 auto;
     }
+
+    .home-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .home-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .home-btn img {
+      width: 28px;
+      height: 28px;
+    }
+
   </style>
 </head>
 <body>
-  <h2>Infografis Absensi Siswa</h2>
+  <a href="index.html" class="home-btn" title="Kembali ke Dashboard">
+    <img src="https://img.icons8.com/fluency/48/home.png" alt="Home">
+  </a>
+
+  <h2>📊 Infografis Absensi Siswa</h2>
 
   <!-- Ringkasan -->
   <div class="card">
-      <h3 id="totalSiswa">0</h3>
-      <p>Total Siswa</p>
-    </div>
+    <h3 id="totalSiswa">0</h3>
+    <p>Total Siswa</p>
+  </div>
   <div class="summary">
-    
+
     <div class="card">
       <div class="chart-wrapper">
         <canvas id="chartAbsensi"></canvas>
